@@ -1,0 +1,73 @@
+import pygame
+import random
+
+pygame.init()
+
+# Scherm
+scherm = pygame.display.set_mode((600, 600))
+pygame.display.set_caption("Memory Game")
+
+# Emoji-kaarten (8 paren = 16 kaarten)
+kaarten = ["🐶", "🐱", "🐸", "🐵", "🦊", "🐼", "🐷", "🐰"] * 2
+random.shuffle(kaarten)
+
+# Lettertype
+font = pygame.font.SysFont("Segoe UI Emoji", 50)
+
+# Kaartjes maken (4x4)
+vakken = []
+for rij in range(4):
+    for kolom in range(4):
+        vak = pygame.Rect(kolom * 140 + 20, rij * 140 + 20, 120, 120)
+        vakken.append(vak)
+
+omgedraaid = []
+gevonden = []
+score = 0
+
+running = True
+while running:
+    scherm.fill((255, 255, 255))
+
+    # Kaarten tekenen
+    for i in range(16):
+
+        if i in omgedraaid or i in gevonden:
+            pygame.draw.rect(scherm, (0, 255, 0), vakken[i])
+            tekst = font.render(kaarten[i], True, (0, 0, 0))
+            scherm.blit(tekst, (vakken[i].x + 30, vakken[i].y + 30))
+        else:
+            pygame.draw.rect(scherm, (100, 100, 100), vakken[i])
+
+    # Score tonen
+    scoreTekst = font.render(str(score), True, (0, 0, 0))
+    scherm.blit(scoreTekst, (10, 10))
+
+    pygame.display.update()
+
+    for event in pygame.event.get():
+
+        if event.type == pygame.QUIT:
+            running = False
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+
+            for i in range(16):
+
+                if vakken[i].collidepoint(event.pos):
+
+                    if i not in omgedraaid and i not in gevonden:
+                        omgedraaid.append(i)
+
+            if len(omgedraaid) == 2:
+
+                pygame.display.update()
+                pygame.time.wait(1000)
+
+                if kaarten[omgedraaid[0]] == kaarten[omgedraaid[1]]:
+                    gevonden.extend(omgedraaid)
+                    score += 1
+
+                omgedraaid = []
+
+pygame.quit()
